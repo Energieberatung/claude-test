@@ -1,4 +1,5 @@
-const fs = require('fs');
+const fs = require('fs'), path = require('path'), os = require('os');
+const MOD = path.join(os.tmpdir(), 'lueftung_test_mod.js');
 const src = fs.readFileSync(process.argv[2], 'utf8');
 function grab(re) { const m = src.match(re); if (!m) throw new Error('nicht gefunden: ' + re); return m[0]; }
 const code = [
@@ -9,8 +10,8 @@ const code = [
   grab(/const LUEFTUNG_HINWEIS_RECHNUNG = .*\n/),
   grab(/let _lueftungEigene = null;[\s\S]*?\nfunction lueftungsAnfragenMelden_/).replace(/\nfunction lueftungsAnfragenMelden_$/, ''),
 ].join('\n') + '\nmodule.exports={lueftungVomKunden_, LUEFTUNG_HINWEIS, FESTSETZUNG_WEITERE_BERATUNG, LUEFTUNG_HINWEIS_RECHNUNG};';
-fs.writeFileSync('/tmp/claude-0/-home-user-claude-test/9ae2cb07-7927-5b6f-bc7a-f967b07bcd65/scratchpad/_mod.js', code);
-const M = require('/tmp/claude-0/-home-user-claude-test/9ae2cb07-7927-5b6f-bc7a-f967b07bcd65/scratchpad/_mod.js');
+fs.writeFileSync(MOD, code);
+const M = require(MOD);
 const mail = 'Sehr geehrter Herr Muster,\n\nvielen Dank ...\n\nWichtig: Das BAFA akzeptiert ...\n\n' + M.LUEFTUNG_HINWEIS + '\n\nMit freundlichen Grüßen\nAmina Lemzouri';
 const q = t => t.split('\n').map(l => '> ' + l).join('\n');
 const wrap = (t, n) => t.split('\n').map(l => { const out = []; let cur = ''; l.split(' ').forEach(w => { if ((cur + ' ' + w).length > n) { out.push(cur); cur = w; } else cur = cur ? cur + ' ' + w : w; }); out.push(cur); return out.join('\n'); }).join('\n');
